@@ -61,87 +61,6 @@ function Room({
 
   // Webrtc refs
 
-  useEffect(() => {
-    pusherRef.current = new Pusher(process.env.PUSHER_KEY!, {
-      authEndpoint: "/api/pusher/auth",
-      auth: {
-        params: { username: "saif" },
-      },
-      cluster: "eu",
-    });
-
-    channelRef.current = pusherRef.current.subscribe(
-      `presence-room`
-    ) as PresenceChannel;
-
-    channelRef.current.bind(
-      "pusher:subscription_succeeded",
-
-      (members: Members) => {
-        if (members.count === 1) {
-          console.log(members);
-          // when subscribing, if you are the first member, you are the host
-
-          host.current = true;
-        }
-
-        // example only supports 2 users per call
-
-        if (members.count > 2) {
-          // 3+ person joining will get sent back home
-
-          // Can handle however you'd like
-          router.push("/");
-        }
-
-        console.log("members: ", members);
-
-        handleRoomJoined();
-      }
-    );
-    channelRef.current.bind("client-ready", () => {
-      initiateCall();
-    });
-
-    channelRef.current.bind(
-      "client-offer",
-
-      (offer: RTCSessionDescriptionInit) => {
-        // offer is sent by the host, so only non-host should handle it
-
-        if (!host.current) {
-          handleReceivedOffer(offer);
-        }
-      }
-    );
-
-    // when a member leaves the chat
-
-    channelRef.current.bind("pusher:member_removed", handlePeerLeaving);
-
-    channelRef.current.bind(
-      "client-answer",
-
-      (answer: RTCSessionDescriptionInit) => {
-        // answer is sent by non-host, so only host should handle it
-
-        if (host.current) {
-          handleAnswerReceived(answer as RTCSessionDescriptionInit);
-        }
-      }
-    );
-
-    channelRef.current.bind(
-      "client-ice-candidate",
-
-      (iceCandidate: RTCIceCandidate) => {
-        // answer is sent by non-host, so only host should handle it
-
-        handlerNewIceCandidateMsg(iceCandidate);
-      }
-    );
-  }, []);
-
   const handleRoomJoined = () => {
     navigator.mediaDevices
       .getUserMedia({
@@ -356,6 +275,98 @@ function Room({
 
     router.push("/");
   };
+
+  useEffect(() => {
+    pusherRef.current = new Pusher(process.env.PUSHER_KEY!, {
+      authEndpoint: "/api/pusher/auth",
+      auth: {
+        params: { username: "saif" },
+      },
+      cluster: "eu",
+    });
+
+    channelRef.current = pusherRef.current.subscribe(
+      `presence-room`
+    ) as PresenceChannel;
+
+    channelRef.current.bind(
+      "pusher:subscription_succeeded",
+
+      (members: Members) => {
+        if (members.count === 1) {
+          console.log(members);
+          // when subscribing, if you are the first member, you are the host
+
+          host.current = true;
+        }
+
+        // example only supports 2 users per call
+
+        if (members.count > 2) {
+          // 3+ person joining will get sent back home
+
+          // Can handle however you'd like
+          router.push("/");
+        }
+
+        console.log("members: ", members);
+
+        handleRoomJoined();
+      }
+    );
+    channelRef.current.bind("client-ready", () => {
+      initiateCall();
+    });
+
+    channelRef.current.bind(
+      "client-offer",
+
+      (offer: RTCSessionDescriptionInit) => {
+        // offer is sent by the host, so only non-host should handle it
+
+        if (!host.current) {
+          handleReceivedOffer(offer);
+        }
+      }
+    );
+
+    // when a member leaves the chat
+
+    channelRef.current.bind("pusher:member_removed", handlePeerLeaving);
+
+    channelRef.current.bind(
+      "client-answer",
+
+      (answer: RTCSessionDescriptionInit) => {
+        // answer is sent by non-host, so only host should handle it
+
+        if (host.current) {
+          handleAnswerReceived(answer as RTCSessionDescriptionInit);
+        }
+      }
+    );
+
+    channelRef.current.bind(
+      "client-ice-candidate",
+
+      (iceCandidate: RTCIceCandidate) => {
+        // answer is sent by non-host, so only host should handle it
+
+        handlerNewIceCandidateMsg(iceCandidate);
+      }
+    );
+  }, [
+    channelRef,
+    handleAnswerReceived,
+    handlePeerLeaving,
+    handleReceivedOffer,
+    handleRoomJoined,
+    handlerNewIceCandidateMsg,
+    host,
+    initiateCall,
+    pusherRef,
+    router,
+  ]);
 
   return (
     <div>
