@@ -3,7 +3,7 @@ import Pusher, { PresenceChannel } from "pusher-js";
 import { ReactNode, useRef, useState } from "react";
 
 export const RoomHOC = (WrappedComponenet: any) => {
-  const withStats = (props: any) => {
+  const WithStats = (props: any) => {
     const router = useRouter();
     const host = useRef(false);
 
@@ -37,5 +37,5 @@ export const RoomHOC = (WrappedComponenet: any) => {
       />
     );
   };
-  return withStats;
+  return WithStats;
 };
