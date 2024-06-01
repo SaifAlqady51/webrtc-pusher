@@ -355,18 +355,7 @@ function Room({
         handlerNewIceCandidateMsg(iceCandidate);
       }
     );
-  }, [
-    channelRef,
-    handleAnswerReceived,
-    handlePeerLeaving,
-    handleReceivedOffer,
-    handleRoomJoined,
-    handlerNewIceCandidateMsg,
-    host,
-    initiateCall,
-    pusherRef,
-    router,
-  ]);
+  }, []);
 
   return (
     <div>
