@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useStreamHook } from "../hooks/useMediaStream";
 import { useWebRtcHook } from "@/hooks/useWebRTC";
+import { ControlButtons } from "./ControlButtons";
 
 export default function Room() {
   const router = useRouter();
@@ -105,35 +106,20 @@ export default function Room() {
   return (
     <div>
       <div className="w-full h-full flex gap-12">
-        <div className="w-1/2 h-96 bg-white">
-          <video autoPlay ref={userVideo} muted />
+        <div className="w-1/2 h-96 bg-gray-800 rounded-xl relative ">
+          <video autoPlay ref={userVideo} muted className="w-full h-full" />
 
-          <div className=" flex gap-4">
-            <button
-              onClick={toggleMic}
-              type="button"
-              className="bg-blue-400 rounded-md">
-              {micActive ? "Mute Mic" : "UnMute Mic"}
-            </button>
-
-            <button
-              onClick={leaveRoom}
-              type="button"
-              className="bg-blue-400 rounded-md">
-              Leave
-            </button>
-
-            <button
-              onClick={toggleCamera}
-              type="button"
-              className="bg-blue-400 rounded-md">
-              {cameraActive ? "Stop Camera" : "Start Camera"}
-            </button>
-          </div>
+          <ControlButtons
+            toggleMic={toggleMic}
+            micActive={micActive}
+            leaveRoom={leaveRoom}
+            toggleCamera={toggleCamera}
+            cameraActive={cameraActive}
+          />
         </div>
 
-        <div className="w-1/2 h-96 bg-white">
-          <video autoPlay ref={partnerVideo} />
+        <div className="w-1/2 h-96 bg-gray-800 rounded-xl ">
+          <video autoPlay ref={partnerVideo} className="w-full h-full" />
         </div>
       </div>
     </div>
