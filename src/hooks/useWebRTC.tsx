@@ -1,12 +1,11 @@
 import { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
 import { PresenceChannel } from "pusher-js";
-import { MutableRefObject, RefObject } from "react";
+import { MutableRefObject, RefObject, useCallback, useRef } from "react";
 
 type WebRtcHookProps = {
   userStream: MutableRefObject<MediaStream | null>;
   host: MutableRefObject<boolean>;
   channelRef: MutableRefObject<PresenceChannel | null>;
-  rtcConnection: MutableRefObject<RTCPeerConnection | null>;
   partnerVideo: RefObject<HTMLVideoElement>;
   userVideo: RefObject<HTMLVideoElement>;
   router: AppRouterInstance;
@@ -23,11 +22,11 @@ export function useWebRtcHook({
   userStream,
   host,
   channelRef,
-  rtcConnection,
   partnerVideo,
   userVideo,
   router,
 }: WebRtcHookProps) {
+  const rtcConnection = useRef<RTCPeerConnection | null>(null);
   const createPeerConnection = () => {
     const connection = new RTCPeerConnection(ICE_SERVERS);
     connection.onicecandidate = handleICECandidateEvent;
@@ -35,7 +34,7 @@ export function useWebRtcHook({
     connection.onicecandidateerror = (e) => console.log(e);
     return connection;
   };
-  const initiateCall = () => {
+  const initiateCall = useCallback(() => {
     if (host.current) {
       rtcConnection.current = createPeerConnection();
       userStream.current?.getTracks().forEach((track) => {
@@ -52,7 +51,7 @@ export function useWebRtcHook({
           console.log(error);
         });
     }
-  };
+  }, [rtcConnection, userStream, channelRef]);
 
   const handleReceivedOffer = (offer: RTCSessionDescriptionInit) => {
     rtcConnection.current = createPeerConnection();
