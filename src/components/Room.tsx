@@ -11,7 +11,6 @@ export default function Room() {
   const host = useRef(false);
   const pusherRef = useRef<Pusher | null>(null);
   const channelRef = useRef<PresenceChannel | null>(null);
-  const rtcConnection = useRef<RTCPeerConnection | null>(null);
   const userStream = useRef<MediaStream | null>(null);
   const userVideo = useRef<HTMLVideoElement>(null);
   const partnerVideo = useRef<HTMLVideoElement>(null);
@@ -39,7 +38,6 @@ export default function Room() {
   } = useWebRtcHook({
     host,
     userStream,
-    rtcConnection,
     channelRef,
     partnerVideo,
     router,
