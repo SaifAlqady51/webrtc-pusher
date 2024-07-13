@@ -65,30 +65,33 @@ export default function Room() {
           host.current = true;
         }
         if (members.count > 2) {
-          router.push("/");
+          router.push("/room");
         }
         handleRoomJoined();
       }
     );
 
     channelRef.current.bind("client-ready", () => {
+      console.log("Client ready, initiating call...");
       initiateCall();
     });
 
     channelRef.current.bind(
       "client-offer",
-
       (offer: RTCSessionDescriptionInit) => {
+        console.log("Received offer:", offer);
         if (!host.current) {
           handleReceivedOffer(offer);
         }
       }
     );
+
     channelRef.current.bind("pusher:member_removed", handlePeerLeaving);
+
     channelRef.current.bind(
       "client-answer",
-
       (answer: RTCSessionDescriptionInit) => {
+        console.log("Received answer:", answer);
         if (host.current) {
           handleAnswerReceived(answer as RTCSessionDescriptionInit);
         }
@@ -98,9 +101,20 @@ export default function Room() {
     channelRef.current.bind(
       "client-ice-candidate",
       (iceCandidate: RTCIceCandidate) => {
+        console.log("Received ICE candidate:", iceCandidate);
         handlerNewIceCandidateMsg(iceCandidate);
       }
     );
+
+    return () => {
+      if (channelRef.current) {
+        channelRef.current.unbind_all();
+        channelRef.current.unsubscribe();
+      }
+      if (pusherRef.current) {
+        pusherRef.current.disconnect();
+      }
+    };
   }, []);
 
   return (
