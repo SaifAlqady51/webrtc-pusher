@@ -1,6 +1,7 @@
 import { PresenceChannel } from "pusher-js";
 import { Dispatch, MutableRefObject, RefObject, SetStateAction } from "react";
 
+// Define the type for the props that the useStreamHook will use
 type StreamHookProps = {
   micActive: boolean;
   cameraActive: boolean;
@@ -12,6 +13,7 @@ type StreamHookProps = {
   channelRef: MutableRefObject<PresenceChannel | null>;
 };
 
+// Define the useStreamHook function
 export function useStreamHook({
   micActive,
   cameraActive,
@@ -22,27 +24,32 @@ export function useStreamHook({
   host,
   channelRef,
 }: StreamHookProps) {
+  // Function to handle actions when a room is joined
   const handleRoomJoined = () => {
+    // Request access to user's media devices (microphone and camera)
     navigator.mediaDevices
       .getUserMedia({
         audio: true,
         video: { width: 1280, height: 720 },
       })
       .then((stream) => {
-        /* use the stream */
+        // Set the user's stream to the obtained media stream
         userStream.current = stream;
         userVideo.current!.srcObject = stream;
+
+        // Play the video when metadata is loaded
         userVideo.current!.onloadedmetadata = () => {
           userVideo.current!.play();
         };
+
+        // If not the host, trigger a client-ready event
         if (!host.current) {
-          // the 2nd peer joining will tell to host they are ready
           console.log("triggering client ready");
           channelRef.current!.trigger("client-ready", {});
         }
       })
       .catch((err) => {
-        /* handle the error */
+        // Handle errors that occur while accessing media devices
         console.error("Error accessing media devices:", err);
         if (err.name === "NotAllowedError") {
           alert(
@@ -69,6 +76,8 @@ export function useStreamHook({
         }
       });
   };
+
+  // Function to toggle media stream (audio/video) on or off
   const toggleMediaStream = (type: "video" | "audio", state: boolean) => {
     userStream.current!.getTracks().forEach((track) => {
       if (track.kind === type) {
@@ -77,18 +86,19 @@ export function useStreamHook({
     });
   };
 
+  // Function to toggle the microphone on or off
   const toggleMic = () => {
     toggleMediaStream("audio", micActive);
-
     setMicActive((prev) => !prev);
   };
 
+  // Function to toggle the camera on or off
   const toggleCamera = () => {
     toggleMediaStream("video", cameraActive);
-
     setCameraActive((prev) => !prev);
   };
 
+  // Return the functions to be used outside the hook
   return {
     toggleMic,
     toggleCamera,
